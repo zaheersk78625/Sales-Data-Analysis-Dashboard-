@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserPreference(data) {
+      return data.userId is string && 
+             data.userId == request.auth.uid &&
+             data.notificationEnabled is bool &&
+             data.currency in ["USD", "EUR", "GBP", "JPY", "INR", "CAD", "AUD", "CNY"] &&
+             (data.get('receiverEmail', '') is string) &&
+             (data.get('profitThreshold', 0) is number);
+    }
+
+    match /userPreferences/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserPreference(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserPreference(request.resource.data) &&
+                    request.resource.data.userId == resource.data.userId;
+    }
+  }
+}

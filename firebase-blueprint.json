@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "UserPreference": {
+      "title": "User Preference",
+      "description": "User specific settings for notifications and dashboard customization",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "notificationEnabled": { "type": "boolean" },
+        "receiverEmail": { "type": "string" },
+        "profitThreshold": { "type": "number" },
+        "currency": { "type": "string", "enum": ["USD", "EUR", "GBP", "JPY", "INR"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "notificationEnabled", "currency"]
+    }
+  },
+  "firestore": {
+    "/userPreferences/{userId}": {
+      "schema": "UserPreference",
+      "description": "Stores individual user preferences"
+    }
+  }
+}
